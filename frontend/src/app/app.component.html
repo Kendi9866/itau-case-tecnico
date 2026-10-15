@@ -1,0 +1,87 @@
+<main class="page-shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Página inicial">
+      <span class="brand-mark" aria-hidden="true">i</span>
+      <span>Pagamentos <span class="brand-light">/ consulta</span></span>
+    </a>
+    <span class="environment"><span class="status-dot"></span> Consulta de pendências</span>
+  </header>
+
+  <section class="content">
+    <div class="eyebrow">VISÃO DO CLIENTE</div>
+    <h1>Consulte as pendências<br>de pagamento.</h1>
+    <p class="intro">Informe o ID do cliente para visualizar o resumo dos pagamentos que aguardam autorização.</p>
+
+    <form class="search-card" (ngSubmit)="consultar()">
+      <label for="clienteId">ID do cliente</label>
+      <div class="search-row">
+        <input
+          id="clienteId"
+          name="clienteId"
+          type="text"
+          [(ngModel)]="clienteId"
+          placeholder="Ex.: 123"
+          autocomplete="off"
+          maxlength="50"
+          [disabled]="carregando()"
+          aria-describedby="input-hint">
+        <button type="submit" [disabled]="carregando()">
+          @if (carregando()) {
+            <span class="spinner" aria-hidden="true"></span>
+            Consultando
+          } @else {
+            Consultar <span aria-hidden="true">→</span>
+          }
+        </button>
+      </div>
+      <p id="input-hint" class="input-hint">Use letras, números, hífen ou underscore. Experimente <button class="sample-link" type="button" (click)="clienteId = '123'">123</button> ou <button class="sample-link" type="button" (click)="clienteId = '456'">456</button>.</p>
+    </form>
+
+    @if (erro()) {
+      <div class="error-card" role="alert">
+        <span class="error-icon" aria-hidden="true">!</span>
+        <div>
+          <strong>Não foi possível concluir a consulta</strong>
+          <p>{{ erro() }}</p>
+        </div>
+      </div>
+    }
+
+    @if (resultado(); as resumo) {
+      <section class="result-section" aria-live="polite">
+        <div class="result-heading">
+          <div>
+            <div class="eyebrow">RESULTADO DA CONSULTA</div>
+            <h2>Cliente {{ clienteId.trim() }}</h2>
+          </div>
+          <span class="result-badge" [class.badge-pending]="resumo.possuiPendencias">
+            <span class="status-dot"></span>
+            {{ resumo.possuiPendencias ? 'Ação necessária' : 'Tudo em dia' }}
+          </span>
+        </div>
+
+        <div class="metrics">
+          <article class="metric-card">
+            <span class="metric-label">Pagamentos pendentes</span>
+            <strong>{{ resumo.quantidade }}</strong>
+            <span class="metric-caption">aguardando autorização</span>
+          </article>
+          <article class="metric-card metric-total">
+            <span class="metric-label">Valor total pendente</span>
+            <strong>{{ resumo.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+            <span class="metric-caption">soma dos pagamentos pendentes</span>
+          </article>
+        </div>
+
+        @if (!resumo.possuiPendencias) {
+          <div class="clear-note">
+            <span aria-hidden="true">✓</span>
+            <p><strong>Nenhuma pendência encontrada.</strong><br>Este cliente não possui pagamentos aguardando autorização.</p>
+          </div>
+        }
+      </section>
+    }
+
+    <footer>Os dados exibidos são um resumo dos pagamentos aguardando autorização.</footer>
+  </section>
+</main>
