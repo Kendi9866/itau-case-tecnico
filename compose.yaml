@@ -1,0 +1,36 @@
+services:
+  pagamentos-mock:
+    build:
+      context: ./pagamentos-mock
+    expose:
+      - "8081"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8081/health').then(response => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 2s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PAGAMENTOS_API_BASE_URL: ${PAGAMENTOS_API_BASE_URL:-http://pagamentos-mock:8081}
+    depends_on:
+      pagamentos-mock:
+        condition: service_healthy
+    expose:
+      - "8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"

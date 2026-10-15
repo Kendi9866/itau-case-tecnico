@@ -1,28 +1,58 @@
-# BFF de pendências de pagamentos
+# Consulta de pendências de pagamentos
 
-BFF Spring Boot que consulta a API de pagamentos e expõe somente o resumo das
-pendências de autorização por cliente.
+Aplicação de demonstração com frontend Angular, BFF Spring Boot e uma API
+simulada de pagamentos. O BFF consulta o serviço de pagamentos e expõe somente
+o resumo das pendências de autorização por cliente.
 
-## Executar
+## Executar a aplicação completa
 
-Requisitos: Java 21.
+Requisito: Docker com Docker Compose.
+
+```sh
+docker compose up --build
+```
+
+Abra [http://localhost:8080](http://localhost:8080). O ambiente inicia os três
+serviços e encaminha as chamadas do frontend pelo BFF. Para encerrar:
+
+```sh
+docker compose down
+```
+
+## API simulada de pagamentos
+
+O container `pagamentos-mock` implementa o contrato externo em memória para a
+demo:
+
+- Cliente `123`: dois pagamentos pendentes, total de R$ 1.542,30, e um pagamento
+  autorizado.
+- Cliente `456`: somente um pagamento autorizado, sem pendências.
+- Outros IDs válidos: lista de pagamentos vazia.
+
+O BFF chama `GET {PAGAMENTOS_API_BASE_URL}/api/pagamentos?clienteId={id}`. O
+serviço deve retornar `clienteId` e uma lista `pagamentos` com `id` (texto),
+`valor` (número decimal) e `status` (`PENDENTE` ou `AUTORIZADO`). Os timeouts de
+conexão e leitura são, respectivamente, 1 e 2 segundos.
+
+Para consultar uma API real, configure `PAGAMENTOS_API_BASE_URL` com um endereço
+alcançável de dentro do container do BFF. Por exemplo, no PowerShell:
+
+```powershell
+$env:PAGAMENTOS_API_BASE_URL = "https://pagamentos.exemplo.com"
+docker compose up --build
+```
+
+O padrão `http://pagamentos-mock:8081` continua sendo usado quando a variável
+não está definida. A API simulada pode permanecer iniciada sem ser consultada.
+
+## Executar somente o BFF localmente
+
+Requisitos: Java 21 e uma API de pagamentos disponível. Por padrão, o BFF espera
+essa API em `http://localhost:8081`.
 
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
-
-Por padrão, o BFF espera a API de pagamentos em `http://localhost:8081`. Para
-usar outro endereço, configure `PAGAMENTOS_API_BASE_URL`, por exemplo:
-
-```powershell
-$env:PAGAMENTOS_API_BASE_URL = "http://localhost:9090"
-.\mvnw.cmd spring-boot:run
-```
-
-O BFF chama `GET {PAGAMENTOS_API_BASE_URL}/api/pagamentos?clienteId={id}`.
-O serviço de domínio deve retornar `clienteId` e uma lista `pagamentos` com
-`id` (texto), `valor` (número decimal) e `status` (`PENDENTE` ou `AUTORIZADO`).
-Os timeouts de conexão e leitura são, respectivamente, 1 e 2 segundos.
 
 ## Endpoint
 
