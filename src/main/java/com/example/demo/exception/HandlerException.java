@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class HandlerException {
@@ -27,6 +28,11 @@ public class HandlerException {
     @ExceptionHandler(PagamentoApiException.class)
     public ResponseEntity<ApiError> handlePaymentApiFailure(PagamentoApiException exception) {
         return error(HttpStatus.BAD_GATEWAY, "Não foi possível obter os pagamentos", "payment_api_failure");
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(NoResourceFoundException exception) {
+        return error(HttpStatus.NOT_FOUND, "Recurso não encontrado", "resource_not_found");
     }
 
     @ExceptionHandler(Exception.class)

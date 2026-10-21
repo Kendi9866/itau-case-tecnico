@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -53,12 +54,17 @@ class PendenteControllerHttpTest {
     }
 
     @Test
-    void deveRejeitarClienteIdAusenteOuInvalidoAntesDeChamarApi() throws Exception {
+    void deveRetornarNotFoundQuandoUrlNaoInformaClienteId() throws Exception {
         mockMvc.perform(get("/clientes/pendencias"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("clienteId inválido"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Recurso não encontrado"))
                 .andExpect(jsonPath("$.correlationId").isNotEmpty());
 
+        verifyNoInteractions(pagamentoApiClient);
+    }
+
+    @Test
+    void deveRejeitarClienteIdInvalidoAntesDeChamarApi() throws Exception {
         mockMvc.perform(get("/clientes/abc%20def/pendencias"))
                 .andExpect(status().isBadRequest());
 
