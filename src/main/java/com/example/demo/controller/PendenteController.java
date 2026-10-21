@@ -17,7 +17,7 @@ public class PendenteController {
         this.pendenteService = pendenteService;
     }
 
-    @GetMapping({"/{clienteId}/pendencias", "/pendencias"})
+    @GetMapping({"/{clienteId}/pendencias"})
     public PendenciasDTO retornarPendencia(@PathVariable(required = false) String clienteId) {
         return pendenteService.retornarPendencia(clienteId);
     }
